@@ -4,6 +4,8 @@ import re
 import sys
 from copy import copy
 
+import numpy as np
+
 DAMPING = 0.85
 SAMPLES = 10000
 
@@ -103,7 +105,33 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+
+    # Begin with rank 0 for all pages
+    page_rank = {page: 0 for page in corpus}
+
+    # Initial sample is a random page
+    current_page = random.choice(list(corpus.keys()))
+    page_rank[current_page] += 1
+
+    # For the remaining n-1 samples
+    for i in range(n-1):
+        # Calculate the transition model of the current page
+        trans = transition_model(corpus, current_page, damping_factor)
+
+        # Pick a new page based on the calculated probability weights
+        current_page = np.random.choice(
+            list(trans.keys()), 1, p=list(trans.values()))[0]
+
+        # Count the number of hits per page
+        page_rank[current_page] += 1
+
+    return {k: float(v)/n for (k, v) in page_rank.items()}
+
+
+def check_converge(old_rank, new_rank):
+
+    values = zip(old_rank.values(), new_rank.values())
+    return all([abs(o - n) < 0.001 for o, n in values])
 
 
 def iterate_pagerank(corpus, damping_factor):
