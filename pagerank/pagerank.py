@@ -2,6 +2,7 @@ import os
 import random
 import re
 import sys
+from copy import copy
 
 DAMPING = 0.85
 SAMPLES = 10000
@@ -56,8 +57,41 @@ def transition_model(corpus, page, damping_factor):
     With probability `damping_factor`, choose a link at random
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
+
+        corpus = {"1.html": {"2.html", "3.html"},
+                  "2.html": {"3.html"},
+                  "3.html": {"2.html"}}
+
+        page = "1.html"
+
+        damping = 0.85
+
+        return = {"1.html": 0.05, "2.html": 0.475, "3.html": 0.475}
     """
-    raise NotImplementedError
+
+    # If a page has no outgoing links,
+    # operate as if it had links to *all* pages
+    # i.e., pick from all pages equally
+    if not len(corpus[page]):
+        corpus = copy(corpus)  # copy mutable dictionary
+        corpus[page] = set(corpus.keys())
+
+    # Chance to visit any page in corpus
+    all_chance = (1 - damping_factor) / len(corpus)
+    # Chance to visit each linked page
+    link_chance = damping_factor / len(corpus[page])
+
+    # Set up dictionary to hold results. Weight 0
+    distribution = {page: 0 for page in corpus}
+
+    # All pages have weight `all_chance`
+    # Add link bonus for links in current `page`
+    for link in corpus:
+        if link in corpus[page]:
+            distribution[link] += link_chance
+        distribution[link] += all_chance
+
+    return distribution
 
 
 def sample_pagerank(corpus, damping_factor, n):
