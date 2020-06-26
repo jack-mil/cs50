@@ -143,7 +143,45 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+
+    # Preprocess corpus to set pages with no links
+    # as if linking to all pages
+    corpus = copy(corpus)  # copy mutable dictionary
+    for page in corpus:
+        if not len(corpus[page]):
+            corpus[page] = set(corpus.keys())
+
+    # (1 - d) / N doesn't change
+    const = (1-damping_factor) / len(corpus)
+
+    # Initial ranking starts as 1/N for all pages
+    current_rank = {page: 1/len(corpus) for page in corpus}
+
+    # Iterate until convergence
+    while True:
+        new_rank = {}
+        for page in corpus:
+
+            link_ranks = []
+            # For every page `i` in the corpus,
+            # check if it links to the current page.
+            # link_ranks is PR(i) / NumLinks(i) for each page `i`
+            for i in corpus:
+                if page in corpus[i]:
+                    num_links = len(corpus[i])
+                    link_ranks.append(current_rank[i] / num_links)
+
+            # Calculate new rank based on formula
+            # PR(p) = (1 - d) / N + d*Σ_i(PR(i) / NumLinks(i))
+            new_rank[page] = const + damping_factor * sum(link_ranks)
+
+        # If no value has changed by more than 0.001, ranks have converged
+        if(check_converge(current_rank, new_rank)):
+            break
+
+        current_rank = new_rank
+
+    return current_rank
 
 
 if __name__ == "__main__":
