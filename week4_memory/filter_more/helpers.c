@@ -82,33 +82,34 @@ void swap(RGBTRIPLE *a, RGBTRIPLE *b)
 void blur(int height, int width, RGBTRIPLE image[height][width])
 {
     // Allocate memory for a copy of the image array
-    RGBTRIPLE(*orgimg)
-    [width] = calloc(height, width * sizeof(RGBTRIPLE));
+    RGBTRIPLE(*orgimg)[width] = calloc(height, width * sizeof(RGBTRIPLE));
 
     // Copy the values to the new memory locations
     memcpy(orgimg, image, width * height * sizeof(RGBTRIPLE));
 
     int sumred, sumgreen, sumblue, count;
 
+    // Loop through entire image
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
         {
             count = sumred = sumgreen = sumblue = 0;
 
-            // For a 3x3 area around each pixel:
-            for (int h = -1; h < 2; h++)
+            // use vertical and horizontal offset to index 
+            // a 3x3 area around each pixel
+            for (int vo = -1; vo < 2; vo++)
             {
-                for (int k = -1; k < 2; k++)
+                for (int ho = -1; ho < 2; ho++)
                 {
                     // If we are on a pixel out of range, skip to the next pixel
-                    if (i + h > height - 1 || i + h < 0 || j + k > width - 1 || j + k < 0)
+                    if (i + vo > height - 1 || i + vo < 0 || j + ho > width - 1 || j + ho < 0)
                         continue;
 
                     // Add up the total of each color in the 3x3 grid
-                    sumred += orgimg[i + h][j + k].rgbtRed;
-                    sumgreen += orgimg[i + h][j + k].rgbtGreen;
-                    sumblue += orgimg[i + h][j + k].rgbtBlue;
+                    sumred += orgimg[i + vo][j + ho].rgbtRed;
+                    sumgreen += orgimg[i + vo][j + ho].rgbtGreen;
+                    sumblue += orgimg[i + vo][j + ho].rgbtBlue;
                     count++;
                 }
             }
@@ -133,12 +134,11 @@ void edges(int height, int width, RGBTRIPLE image[height][width])
                           {-2, 0, 2},
                           {-1, 0, 1}};
     const int Gy[3][3] = {{-1, -2, -1},
-                          {0, 0, 0},
-                          {1, 2, 1}};
+                          { 0,  0,  0},
+                          { 1,  2,  1}};
 
     // Allocate memory for a copy of the image array
-    RGBTRIPLE(*orgimg)
-    [width] = calloc(height, width * sizeof(RGBTRIPLE));
+    RGBTRIPLE(*orgimg)[width] = calloc(height, width * sizeof(RGBTRIPLE));
 
     // Copy the values to the new memory location
     memcpy(orgimg, image, width * height * sizeof(RGBTRIPLE));
@@ -155,24 +155,25 @@ void edges(int height, int width, RGBTRIPLE image[height][width])
             gxr = gxg = gxb = 0;
             gyr = gyg = gyb = 0;
 
-            // For a 3x3 area around each pixel:
-            for (int h = -1; h < 2; h++)
+            // For a 3x3 area around each pixel
+            // define vertical and horizontal offset (vo, ho)
+            for (int vo = -1; vo < 2; vo++)
             {
-                for (int k = -1; k < 2; k++)
+                for (int ho = -1; ho < 2; ho++)
                 {
                     // Skip pixels on the edge
-                    if (i + h > height - 1 || i + h < 0 || j + k > width - 1 || j + k < 0)
+                    if (i + vo > height - 1 || i + vo < 0 || j + ho > width - 1 || j + ho < 0)
                         continue;
 
                     // Use Gx kernel to find edges in x-direction
-                    gxr += orgimg[i + h][j + k].rgbtRed * Gx[h + 1][k + 1];
-                    gxg += orgimg[i + h][j + k].rgbtGreen * Gx[h + 1][k + 1];
-                    gxb += orgimg[i + h][j + k].rgbtBlue * Gx[h + 1][k + 1];
+                    gxr += orgimg[i + vo][j + ho].rgbtRed * Gx[vo + 1][ho + 1];
+                    gxg += orgimg[i + vo][j + ho].rgbtGreen * Gx[vo + 1][ho + 1];
+                    gxb += orgimg[i + vo][j + ho].rgbtBlue * Gx[vo + 1][ho + 1];
 
                     // Use Gy kernel to find edges in y-direction
-                    gyr += orgimg[i + h][j + k].rgbtRed * Gy[h + 1][k + 1];
-                    gyg += orgimg[i + h][j + k].rgbtGreen * Gy[h + 1][k + 1];
-                    gyb += orgimg[i + h][j + k].rgbtBlue * Gy[h + 1][k + 1];
+                    gyr += orgimg[i + vo][j + ho].rgbtRed * Gy[vo + 1][ho + 1];
+                    gyg += orgimg[i + vo][j + ho].rgbtGreen * Gy[vo + 1][ho + 1];
+                    gyb += orgimg[i + vo][j + ho].rgbtBlue * Gy[vo + 1][ho + 1];
                 }
             }
 
