@@ -11,6 +11,9 @@
 # Unignore makefile
 ![mM]akefile
 
+#ignore vscode files
+.vscode/
+
 ## VV  AUTO-GENERATED  VV
 # Created by https://www.toptal.com/developers/gitignore/api/c,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=c,python
